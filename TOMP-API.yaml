@@ -1451,16 +1451,10 @@ components:
         - $ref: "#/components/schemas/bookingRequest"
         - type: object
           required:
-            - conditions
             - legs
           properties:
             state:
               $ref: "#/components/schemas/bookingState"
-            conditions:
-              description: The conditions that apply to this booking, there may be more conditions in a parent planning object (if this is returned as part of that) or in one of the legs (specific to that leg)
-              type: array
-              items:
-                $ref: "#/components/schemas/condition"
             legs:
               description: The legs of this booking, generally just one for simple legs, in order of how they will be travelled
               type: array
@@ -1677,6 +1671,9 @@ components:
     coordinates:
       type: object
       description: a lon, lat (WGS84, EPSG:4326)
+      required:
+        - lat
+        - lng
       properties:
         lng:
           type: number
@@ -2038,6 +2035,9 @@ components:
         - from
         - assetType
       properties:
+        id:
+          description: The unique identifier (TO) of this leg
+          type: string
         from:
           description: The departure location of this leg, using this asset type
           $ref: "#/components/schemas/place"
@@ -2232,6 +2232,9 @@ components:
       properties:
         from:
           $ref: "#/components/schemas/place"
+        radius:
+          description: Maximum distance in meters a user wants to travel to reach the travel option
+          type: number
         to:
           $ref: "#/components/schemas/place"
         departureTime:
@@ -2251,10 +2254,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/traveler"
+        useAssets:
+          description: The specific asset(s), the user wishes to receive leg options for
+          type: array
+          items:
+            type: string
+            format: an asset id for this operator
 
     planning:
       description: A travel planning with bookable options that fulfil the constraints of the planning
       type: object
+      required:
+        - validUntil
+        - options
       allOf:
         - $ref: "#/components/schemas/planningRequest"
         - type: object
@@ -2263,11 +2275,6 @@ components:
               description: The time until which the presented options are (likely) available
               type: string
               format: date-time
-            conditions:
-              description: The conditions that apply to all presented options
-              type: array
-              items:
-                $ref: "#/components/schemas/condition"
             options:
               type: array
               items:
